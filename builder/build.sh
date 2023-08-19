@@ -5,9 +5,9 @@ main() {
 	github_key=$(printenv GITHUB_KEY)
 	pkg_name=$(printenv PKG_NAME)
 	source_path="/home/builder/source"
-	prepare_source "https://github.com/$repo/$pkg_name" "$source_path"
+	prepare_source "https://aur.archlinux.org/$pkg_name.git" "$source_path"
 	build "$source_path" ""
-	version=$(generate_version "$source_path/PKGBUILD")
+	version=$(generate_version "$source_path/$pkg_name/PKGBUILD")
 	github_login "$github_key"
 	github_check_same_version "$version" "$repo"
 }

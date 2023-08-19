@@ -1,6 +1,6 @@
 #!/bin/bash
 main() {
-	set_errexit "on" >>/dev/null
+	set -e
 	local repo source_path version github_key pkg_name
 	repo=$(printenv REPO)
 	github_key=$(printenv GITHUB_KEY)
@@ -52,24 +52,12 @@ github_create_release() {
 github_check_same_version() {
 	local tag=$1
 	local repo=$2
-	local previous_errexit
-	previous_errexit=$(set_errexit "off")
+	set +e
 	gh release view "$tag" --repo "$repo"
 	local tag_exists=$?
-	set_errexit "$previous_errexit"
+	set -e
 	if [[ $tag_exists = 0 ]]; then
 		gh release delete "$tag" --cleanup-tag --repo "$repo"
 	fi
-}
-set_errexit() {
-	local state=$1
-	local previous_state
-	previous_state=$(set -o | grep errexit | sed -e 's/errexit//g' -e 's/ //g' -e 's/\t//g')
-	if [[ "$state" = "on" ]]; then
-		set -e
-	elif [[ "$state" = "off" ]]; then
-		set +e
-	fi
-	echo "$previous_state"
 }
 main

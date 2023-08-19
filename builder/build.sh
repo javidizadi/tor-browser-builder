@@ -1,6 +1,6 @@
 #!/bin/bash
 main() {
-	set_errexit "on"
+	set_errexit "on" >>/dev/null
 	local repo source_path version github_key pkg_name
 	repo=$(printenv REPO)
 	github_key=$(printenv GITHUB_KEY)
@@ -15,16 +15,16 @@ main() {
 prepare_source() {
 	local repo=$1
 	local source_path=$2
-	git clone "$repo" "$source_path"
+	git clone --depth 1 "$repo" "$source_path"
 }
 build() {
 	local source_path=$1
 	local enviroment_vars=$2
 	cd "$source_path" || exit 1
 	if [[ -z "$enviroment_vars" ]]; then
-		makepkg -sc --noconfirm --noprogressbar
+		makepkg -sc --noconfirm --noprogressbar --skippgpcheck
 	else
-		env "$enviroment_vars" makepkg -sc --noconfirm --noprogressbar
+		env "$enviroment_vars" makepkg -sc --noconfirm --noprogressbar --skippgpcheck
 	fi
 }
 generate_version() {

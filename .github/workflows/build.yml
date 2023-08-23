@@ -44,5 +44,5 @@ jobs:
       - name: save docker image tar
         working-directory: cache
         run: |
-          rm *.tar
+          rm -f *.tar
           docker save builder -o builder.tar

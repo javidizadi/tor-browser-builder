@@ -8,7 +8,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Compute SHA256 of builder directory
+        working-directory: builder
+        run: |
+          hash=$(find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c 1-64)
+          echo "BUILDER_DIR_HASH=$hash" >> $GITHUB_ENV
+      
+      - run: mkdir cache
+
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: cache
+          key: docker-image-${{ env.BUILDER_DIR_HASH }}
+
+      - name: load docker image tar
+        if: steps.cache.outputs.cache-hit == 'true'
+        working-directory: cache
+        run: docker load -i builder.tar
+
       - name: build docker image
+        if: steps.cache.outputs.cache-hit != 'true'
         working-directory: builder
         run: docker build . --tag builder:latest
 
@@ -20,3 +40,9 @@ jobs:
           -e REPO=${{ github.repository }} \
           -e PKG_NAME="tor-browser" \
           builder:latest
+
+      - name: save docker image tar
+        working-directory: cache
+        run: |
+          rm -f *.tar
+          docker save builder -o builder.tar

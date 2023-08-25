@@ -12,7 +12,6 @@ main() {
 	github_login "$github_key"
 	github_check_same_version "$version" "$repo"
 	github_create_release "$version" "$source_path" "$repo"
-	cleanup_source "$source_path"
 }
 prepare_source() {
 	local repo=$1
@@ -65,9 +64,5 @@ github_check_same_version() {
 	if [[ $tag_exists = 0 ]]; then
 		gh release delete "$tag" --cleanup-tag --repo "$repo"
 	fi
-}
-cleanup_source() {
-	local source_path=$1
-	rm -rf "$source_path"
 }
 main
